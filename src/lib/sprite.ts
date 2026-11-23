@@ -7,7 +7,7 @@ export const SPRITE_W = 48;
 export const SPRITE_H = 46;
 
 /** Sprites are rendered at this multiple so an uploaded photo can show more detail than the pixel art around it. */
-const RENDER_SCALE = 4;
+const RENDER_SCALE = 6; // photo area = 16 × 6 = 96 px, matching PHOTO_SIZE in pixelate.ts
 
 type Frames = [string, string];
 
@@ -63,8 +63,11 @@ function draw(ctx: CanvasRenderingContext2D, cfg: KrathongConfig, frame: 0 | 1, 
     rect(4, 0, 18, 18, '#ffd166');
     rect(4, 17, 18, 1, '#c98a1e');
     rect(21, 0, 1, 18, '#c98a1e');
-    ctx.imageSmoothingEnabled = false;
+    // New uploads are 96 px and fill the area 1:1. Older 32 px ones are scaled up blocky, not blurry.
+    ctx.imageSmoothingEnabled = img.naturalWidth >= 16 * RENDER_SCALE;
+    ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(img, 5, 1, 16, 16);
+    ctx.imageSmoothingEnabled = false;
   }
 
   // Incense sticks with glowing tips and drifting smoke
