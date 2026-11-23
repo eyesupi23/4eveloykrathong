@@ -6,16 +6,21 @@ import { KrathongSprite } from './KrathongSprite';
 interface Props {
   item: Floating;
   onDone: (id: string) => void;
+  /** This krathong's wish was tapped open (only one at a time; App keeps track). */
+  pinned: boolean;
+  onPin: (id: string) => void;
 }
 
-export const FloatingKrathong = memo(function FloatingKrathong({ item, onDone }: Props) {
-  const [open, setOpen] = useState(item.fresh);
+export const FloatingKrathong = memo(function FloatingKrathong({ item, onDone, pinned, onPin }: Props) {
+  // A freshly floated krathong shows its wish for a while, then tucks it away.
+  const [fresh, setFresh] = useState(item.fresh);
+  const [hover, setHover] = useState(false); // mouse only, so a tap on a phone doesn't stick
+  const open = pinned || hover || fresh;
   const { config, lane } = item;
 
-  // A freshly floated krathong shows its wish for a while, then tucks it away.
   useEffect(() => {
     if (!item.fresh) return;
-    const t = setTimeout(() => setOpen(false), 9000);
+    const t = setTimeout(() => setFresh(false), 9000);
     return () => clearTimeout(t);
   }, [item.fresh]);
 
@@ -55,11 +60,12 @@ export const FloatingKrathong = memo(function FloatingKrathong({ item, onDone }:
           className="krathong-btn pointer-events-auto relative block cursor-pointer"
           aria-label={`กระทง: ${config.wish}`}
           aria-expanded={open}
-          onClick={() => setOpen((o) => !o)}
-          onMouseEnter={() => setOpen(true)}
-          onMouseLeave={() => setOpen(false)}
-          onFocus={() => setOpen(true)}
-          onBlur={() => setOpen(false)}
+          onClick={() => {
+            setFresh(false);
+            onPin(item.id);
+          }}
+          onPointerEnter={(e) => e.pointerType === 'mouse' && setHover(true)}
+          onPointerLeave={() => setHover(false)}
         >
           <KrathongSprite config={config} width={width} />
         </button>
