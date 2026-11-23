@@ -65,7 +65,7 @@ const MAX_MINE = 12;
  * Supabase is connected. They float in the back lanes (small, dimmed, behind yours).
  * Set to false to hide them; replace with real rows from Supabase later.
  */
-const DEMO_VISITORS = true;
+const DEMO_VISITORS = false;
 const MAX_VISITORS = 120;
 /** How many demo visitors are already floating when the page opens. */
 const START_VISITORS = 100;
