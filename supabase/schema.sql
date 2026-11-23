@@ -11,14 +11,23 @@ create table if not exists public.krathongs (
   id          uuid primary key default gen_random_uuid(),
   base        text not null check (base in ('banana', 'bread', 'trunk')),
   flower      text not null check (flower in ('sun', 'sunflower', 'dino', 'rose', 'banana', 'peach', 'rabbit')),
-  -- 32×32 PNG made by the site (a few KB); anything else is rejected
-  image       text check (image is null or (image like 'data:image/png;base64,%' and length(image) <= 20000)),
+  -- Small picture made by the site (96×96 JPEG, or 32×32 PNG from older versions); anything else is rejected
+  image       text,
   wish        text not null check (char_length(btrim(wish)) between 1 and 40),
   name        text not null default '' check (char_length(name) <= 16),
   created_at  timestamptz not null default now()
 );
 
 create index if not exists krathongs_created_at_idx on public.krathongs (created_at desc);
+
+-- Picture rule (kept separate so re-running this file updates it on an existing table)
+alter table public.krathongs drop constraint if exists krathongs_image_check;
+alter table public.krathongs add constraint krathongs_image_check check (
+  image is null or (
+    (image like 'data:image/jpeg;base64,%' or image like 'data:image/png;base64,%')
+    and length(image) <= 20000
+  )
+);
 
 -- ---------------------------------------------------------------------------
 -- Access: anyone may read and float a krathong; nobody may edit or delete through the API
