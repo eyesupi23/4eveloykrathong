@@ -142,11 +142,11 @@ export function Builder({ onClose, onFloat }: Props) {
             <Step n={3} title="เลือกรูปปักกระทง">
               <div className="flex flex-wrap items-center gap-4">
                 <button type="button" onClick={() => fileRef.current?.click()} className="px-chip px-4 py-2 text-sm font-semibold" disabled={busy}>
-                  {busy ? 'กำลังแปลงเป็นพิกเซล…' : image ? 'เปลี่ยนรูป' : 'อัปโหลดรูป'}
+                  {busy ? 'กำลังเตรียมรูป…' : image ? 'เปลี่ยนรูป' : 'อัปโหลดรูป'}
                 </button>
                 {image && (
                   <>
-                    <img src={image} alt="รูปที่ปักบนกระทง" className="pixelated h-12 w-12" />
+                    <img src={image} alt="รูปที่ปักบนกระทง" className="h-12 w-12 object-cover" />
                     <button type="button" onClick={() => setImage(null)} className="text-sm text-mute underline-offset-4 hover:text-ink hover:underline">
                       เอารูปออก
                     </button>
