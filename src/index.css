@@ -1,0 +1,570 @@
+@import "tailwindcss";
+
+@theme {
+  --font-pixel: "Press Start 2P", "Chakra Petch", monospace;
+  --font-thai: "Chakra Petch", ui-sans-serif, system-ui, sans-serif;
+  --color-night: #0b0e30;
+  --color-panel: #1c2158;
+  --color-edge: #0a0c26;
+  --color-ink: #fff6dc;
+  --color-mute: #a9b0e0;
+  --color-gold: #ffd166;
+  --color-ember: #ff9b2f;
+  --color-aqua: #7ee8fa;
+  --color-rose: #ff6b81;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-night);
+  color: var(--color-ink);
+  font-family: var(--font-thai);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pixelated {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Title with hard, stepped 8-bit shadow */
+.px-title {
+  text-shadow:
+    3px 3px 0 #c2410c,
+    6px 6px 0 #0a0c26;
+  letter-spacing: 0.02em;
+}
+
+/* "ลอยกระทง FESTIVAL" title, styled to sit with the 4EVE logo (geometric, magenta) */
+.festival-th {
+  font-family: "Kanit", var(--font-thai);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  background: linear-gradient(180deg, #ffffff 30%, #ffc2e6 62%, #ff3fb0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 10px rgba(255, 31, 168, 0.55)) drop-shadow(0 3px 0 #2a0a3d);
+  padding: 0.12em 0.05em 0; /* room for Thai marks above the line */
+}
+.festival-en {
+  font-family: "Pacifico", cursive;
+  font-weight: 400;
+  color: #ff5cc6;
+  line-height: 1.3;
+  transform: rotate(-4deg);
+}
+.fair-letter {
+  /* text-shadow without a colour uses the letter's current colour, so the glow changes with it */
+  text-shadow: 0 0 2px #fff, 0 0 10px, 0 0 22px;
+  animation: fair-colors 1.44s steps(1) infinite;
+}
+@keyframes fair-colors {
+  0%, 100% { color: #ff5cc6; }
+  20% { color: #ffd166; }
+  40% { color: #4fd8ff; }
+  60% { color: #9ef01a; }
+  80% { color: #ff9b2f; }
+}
+
+/* Notched pixel borders: four offset shadows leave the corners empty */
+.px-window {
+  background: var(--color-panel);
+  margin: 4px;
+  box-shadow:
+    -4px 0 0 0 var(--color-ink),
+    4px 0 0 0 var(--color-ink),
+    0 -4px 0 0 var(--color-ink),
+    0 4px 0 0 var(--color-ink),
+    inset 4px 4px 0 0 #2d3478,
+    inset -4px -4px 0 0 #12164a;
+}
+
+.px-btn {
+  background: var(--color-gold);
+  color: #1a1440;
+  font-weight: 700;
+  box-shadow:
+    -4px 0 0 0 var(--color-edge),
+    4px 0 0 0 var(--color-edge),
+    0 -4px 0 0 var(--color-edge),
+    0 4px 0 0 var(--color-edge),
+    inset -4px -4px 0 0 #e08a1e,
+    inset 4px 4px 0 0 #fff0b8;
+  transition: transform 60ms steps(1);
+}
+.px-btn:hover {
+  background: #ffdc85;
+}
+.px-btn:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow:
+    -4px 0 0 0 var(--color-edge),
+    4px 0 0 0 var(--color-edge),
+    0 -4px 0 0 var(--color-edge),
+    0 4px 0 0 var(--color-edge),
+    inset 4px 4px 0 0 #e08a1e;
+}
+.px-btn-danger,
+.px-btn-danger:hover {
+  background: #e03131;
+  color: var(--color-ink);
+  box-shadow:
+    -4px 0 0 0 var(--color-edge),
+    4px 0 0 0 var(--color-edge),
+    0 -4px 0 0 var(--color-edge),
+    0 4px 0 0 var(--color-edge),
+    inset -4px -4px 0 0 #a61e1e,
+    inset 4px 4px 0 0 #ff8787;
+}
+.px-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.px-chip {
+  background: #12164a;
+  box-shadow:
+    -3px 0 0 0 #3a4196,
+    3px 0 0 0 #3a4196,
+    0 -3px 0 0 #3a4196,
+    0 3px 0 0 #3a4196;
+}
+
+.px-option {
+  background: #12164a;
+  box-shadow:
+    -3px 0 0 0 #3a4196,
+    3px 0 0 0 #3a4196,
+    0 -3px 0 0 #3a4196,
+    0 3px 0 0 #3a4196;
+}
+.px-option[aria-pressed="true"] {
+  background: #2a2f78;
+  box-shadow:
+    -3px 0 0 0 var(--color-gold),
+    3px 0 0 0 var(--color-gold),
+    0 -3px 0 0 var(--color-gold),
+    0 3px 0 0 var(--color-gold);
+}
+
+.px-field {
+  background: #0e1240;
+  color: var(--color-ink);
+  box-shadow:
+    -3px 0 0 0 #3a4196,
+    3px 0 0 0 #3a4196,
+    0 -3px 0 0 #3a4196,
+    0 3px 0 0 #3a4196;
+}
+.px-field:focus {
+  outline: none;
+  box-shadow:
+    -3px 0 0 0 var(--color-aqua),
+    3px 0 0 0 var(--color-aqua),
+    0 -3px 0 0 var(--color-aqua),
+    0 3px 0 0 var(--color-aqua);
+}
+
+.px-btn:focus-visible,
+.px-option:focus-visible,
+.px-chip:focus-visible,
+.krathong-btn:focus-visible {
+  outline: 3px dashed var(--color-aqua);
+  outline-offset: 6px;
+}
+
+/* Wish bubble */
+.px-bubble {
+  background: var(--color-ink);
+  color: #1c2158;
+  box-shadow:
+    -3px 0 0 0 var(--color-edge),
+    3px 0 0 0 var(--color-edge),
+    0 -3px 0 0 var(--color-edge),
+    0 3px 0 0 var(--color-edge);
+  animation: pop 160ms steps(3) both;
+}
+.px-bubble::after,
+.px-bubble::before {
+  content: "";
+  position: absolute;
+  background: var(--color-edge);
+}
+.px-bubble::after {
+  top: calc(100% + 3px);
+  left: calc(50% - 6px);
+  width: 12px;
+  height: 4px;
+}
+.px-bubble::before {
+  top: calc(100% + 7px);
+  left: calc(50% - 2px);
+  width: 4px;
+  height: 4px;
+}
+
+/* Krathong motion */
+.drift {
+  animation-name: drift;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+}
+@keyframes drift {
+  from { transform: translateX(var(--drift-from, -30vw)); }
+  to { transform: translateX(var(--drift-to, 110vw)); }
+}
+
+.bob {
+  transform: translateY(-86%);
+  animation: bob 1.8s steps(2) infinite;
+}
+@keyframes bob {
+  0%, 100% { transform: translateY(-86%); }
+  50% { transform: translateY(calc(-86% - 3px)); }
+}
+
+.flicker {
+  animation: flicker 0.5s steps(1) infinite;
+}
+@keyframes flicker {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.ripple {
+  background: repeating-linear-gradient(90deg, #7ee8fa66 0 6px, transparent 6px 12px);
+  animation: ripple 1.2s steps(2) infinite;
+}
+@keyframes ripple {
+  0%, 100% { transform: scaleX(1); }
+  50% { transform: scaleX(1.18); }
+}
+
+.glow {
+  background: radial-gradient(circle, rgba(255, 170, 60, 0.45) 0%, rgba(255, 140, 40, 0.15) 35%, transparent 65%);
+  mix-blend-mode: screen;
+  animation: glow 0.9s steps(2) infinite;
+}
+@keyframes glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Your own krathong: gold pixel outline, warm aura, twinkling sparkles */
+.is-mine .krathong-btn {
+  filter:
+    drop-shadow(2px 0 0 #ffd166)
+    drop-shadow(-2px 0 0 #ffd166)
+    drop-shadow(0 2px 0 #ffd166)
+    drop-shadow(0 -2px 0 #ffd166)
+    drop-shadow(0 0 10px rgba(255, 200, 90, 0.55));
+}
+.is-visitor .krathong-btn {
+  filter: brightness(0.82) saturate(0.85);
+}
+
+.aura {
+  background: radial-gradient(circle, rgba(255, 214, 120, 0.42) 0%, rgba(255, 170, 60, 0.18) 38%, transparent 66%);
+  mix-blend-mode: screen;
+  animation: glow 1.4s steps(2) infinite;
+}
+
+.sparkle {
+  width: 4px;
+  height: 4px;
+  background: #fff6dc;
+  box-shadow:
+    4px 0 0 #ffd166,
+    -4px 0 0 #ffd166,
+    0 4px 0 #ffd166,
+    0 -4px 0 #ffd166;
+  animation: twinkle 1.6s steps(1) infinite;
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  33% { opacity: 0.4; transform: scale(0.5); }
+  66% { opacity: 0; }
+}
+
+.ripple-gold {
+  background: repeating-linear-gradient(90deg, #ffd166aa 0 6px, transparent 6px 12px);
+}
+
+.mine-tag {
+  background: var(--color-gold);
+  color: #1a1440;
+  box-shadow:
+    -2px 0 0 0 var(--color-edge),
+    2px 0 0 0 var(--color-edge),
+    0 -2px 0 0 var(--color-edge),
+    0 2px 0 0 var(--color-edge);
+}
+
+/* "ฟรีคอนเสิร์ต" banner on the stage */
+.neon-text {
+  filter: drop-shadow(0 0 1px #ff4fd8) drop-shadow(0 0 3px #ff4fd8);
+  animation: neon 2.4s steps(1) infinite;
+}
+@keyframes neon {
+  0%, 100% { opacity: 1; }
+  92% { opacity: 0.55; }
+  94% { opacity: 1; }
+}
+
+/* Photo-mode hint: shows briefly, then gets out of the screenshot */
+.photo-hint {
+  animation: photo-hint 2.6s ease forwards;
+}
+@keyframes photo-hint {
+  0%, 70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes pop {
+  from { transform: scale(0.6); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.blink {
+  animation: flicker 1s steps(1) infinite;
+}
+
+/* Responsive sprite size factor */
+:root { --k: 0.72; }
+@media (min-width: 640px) { :root { --k: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .bob, .flicker, .ripple, .glow, .blink, .aura, .sparkle, .neon-text, .fair-letter, .balloon { animation: none; }
+  .bob { transform: translateY(-86%); }
+}
+
+/* ---------- Mini-game: ปาโป่ง ---------- */
+/* Wooden fair board */
+.balloon-board {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 23%, #4a2a17 23% 25%),
+    repeating-linear-gradient(0deg, #7a4a2a 0 6px, #6b3f22 6px 12px);
+  box-shadow:
+    -4px 0 0 0 #3b2010,
+    4px 0 0 0 #3b2010,
+    0 -4px 0 0 #3b2010,
+    0 4px 0 0 #3b2010;
+}
+
+/* Pixel-stepped round balloon; colour comes from --c */
+.balloon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 82%;
+  aspect-ratio: 5 / 6;
+  background: var(--c);
+  clip-path: polygon(30% 0, 70% 0, 70% 4%, 85% 4%, 85% 10%, 94% 10%, 94% 22%, 100% 22%, 100% 62%, 94% 62%, 94% 74%, 85% 74%, 85% 82%, 70% 82%, 70% 88%, 58% 88%, 58% 94%, 62% 94%, 62% 100%, 38% 100%, 38% 94%, 42% 94%, 42% 88%, 30% 88%, 30% 82%, 15% 82%, 15% 74%, 6% 74%, 6% 62%, 0 62%, 0 22%, 6% 22%, 6% 10%, 15% 10%, 15% 4%, 30% 4%);
+  box-shadow: inset -6px -8px 0 rgb(0 0 0 / 0.18), inset 6px 6px 0 rgb(255 255 255 / 0.3);
+  cursor: crosshair;
+  animation: balloon-in 220ms steps(3) both, balloon-bob 1.6s steps(2) infinite;
+}
+.static-balloon { animation: none; }
+.balloon-face {
+  width: 68%;
+  margin-top: -14%;
+  aspect-ratio: 1;
+  pointer-events: none;
+  clip-path: polygon(25% 0, 75% 0, 75% 8%, 92% 8%, 92% 25%, 100% 25%, 100% 75%, 92% 75%, 92% 92%, 75% 92%, 75% 100%, 25% 100%, 25% 92%, 8% 92%, 8% 75%, 0 75%, 0 25%, 8% 25%, 8% 8%, 25% 8%);
+}
+@keyframes balloon-in {
+  from { transform: scale(0.2); }
+}
+@keyframes balloon-bob {
+  50% { translate: 0 -3px; }
+}
+
+/* Pop: a ring of pixel shards */
+.balloon-burst {
+  width: 60%;
+  aspect-ratio: 1;
+  background:
+    linear-gradient(var(--c), var(--c)) 50% 0 / 12% 12% no-repeat,
+    linear-gradient(var(--c), var(--c)) 50% 100% / 12% 12% no-repeat,
+    linear-gradient(var(--c), var(--c)) 0 50% / 12% 12% no-repeat,
+    linear-gradient(var(--c), var(--c)) 100% 50% / 12% 12% no-repeat,
+    linear-gradient(var(--c), var(--c)) 12% 12% / 10% 10% no-repeat,
+    linear-gradient(var(--c), var(--c)) 88% 12% / 10% 10% no-repeat,
+    linear-gradient(var(--c), var(--c)) 12% 88% / 10% 10% no-repeat,
+    linear-gradient(var(--c), var(--c)) 88% 88% / 10% 10% no-repeat;
+  animation: burst 300ms steps(3) forwards;
+}
+@keyframes burst {
+  from { transform: scale(0.4); opacity: 1; }
+  to { transform: scale(1.3); opacity: 0; }
+}
+
+/* Dart flies in from below and sticks */
+.dart-in {
+  animation: dart-in 120ms steps(3) both, fade-late 700ms steps(4) forwards;
+}
+@keyframes dart-in {
+  from { transform: translateY(70px) scale(1.6); }
+}
+@keyframes fade-late {
+  0%, 60% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.balloon-score {
+  position: absolute;
+  left: 0;
+  top: -6px;
+  translate: -50% -100%;
+  font-size: 14px;
+  text-shadow: 2px 2px 0 #0a0c26;
+  white-space: nowrap;
+  animation: score-up 700ms steps(5) forwards;
+}
+@keyframes score-up {
+  to { transform: translateY(-18px); opacity: 0; }
+}
+
+.count-pop { animation: balloon-in 250ms steps(3) both; }
+
+/* Freeze the river while the game is open */
+.anim-paused,
+.anim-paused * {
+  animation-play-state: paused !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .balloon, .dart-in { animation: none; }
+}
+
+/* Small neon sign over the fair's game zone */
+.game-zone-sign {
+  color: #ffe3f1;
+  text-shadow: 0 0 4px #ff4fa3, 0 0 10px #ff4fa3;
+  animation: neon 2.4s steps(1) infinite;
+}
+
+/* ---------- Mini-game: พลิกป้ายจับคู่ ---------- */
+.match-board {
+  background: repeating-linear-gradient(0deg, #2b2f75 0 6px, #262a6a 6px 12px);
+  box-shadow: -4px 0 0 0 #0a0c26, 4px 0 0 0 #0a0c26, 0 -4px 0 0 #0a0c26, 0 4px 0 0 #0a0c26;
+}
+.match-card {
+  width: calc(25% - 0.375rem); /* 4 per row, the last 2 centred */
+  aspect-ratio: 3 / 4;
+  perspective: 600px;
+  cursor: pointer;
+}
+.match-card:disabled { cursor: default; }
+.match-inner {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 240ms steps(4);
+}
+.match-card.is-up .match-inner { transform: rotateY(180deg); }
+.match-face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  backface-visibility: hidden;
+  overflow: hidden;
+}
+.match-back {
+  background:
+    repeating-linear-gradient(45deg, #ff6b81 0 4px, #e64980 4px 8px);
+  box-shadow: inset 0 0 0 3px #ffd166, inset 0 0 0 6px #c2255c;
+  color: #fff6dc;
+  font-size: 18px;
+  text-shadow: 2px 2px 0 #7a1240;
+}
+.match-front {
+  transform: rotateY(180deg);
+  background: #fff6dc;
+  box-shadow: inset 0 0 0 3px #ffd166;
+}
+.match-front img {
+  width: calc(100% - 6px);
+  height: calc(100% - 6px);
+  object-fit: cover;
+}
+.match-card:focus-visible { outline: 3px dashed var(--color-aqua); outline-offset: 3px; }
+/* A found pair gives a little hop, then leaves an empty spot */
+.match-card.is-matched { animation: match-out 500ms steps(4) 150ms forwards; }
+@keyframes match-out {
+  40% { transform: translateY(-6px) scale(1.08); opacity: 1; }
+  100% { transform: scale(0.6); opacity: 0; visibility: hidden; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .match-inner { transition: none; }
+  .match-card.is-matched { animation: none; opacity: 0; }
+}
+
+/* ---------- Mini-game: สอยดาว ---------- */
+.star-board {
+  background:
+    radial-gradient(1px 1px at 20% 30%, #fff6dc 50%, transparent 51%),
+    radial-gradient(1px 1px at 70% 60%, #fff6dc 50%, transparent 51%),
+    radial-gradient(1px 1px at 45% 85%, #fff6dc 50%, transparent 51%),
+    radial-gradient(1px 1px at 85% 20%, #fff6dc 50%, transparent 51%),
+    linear-gradient(#141849, #2b2068 70%, #4a2a6e);
+  box-shadow: -4px 0 0 0 #0a0c26, 4px 0 0 0 #0a0c26, 0 -4px 0 0 #0a0c26, 0 4px 0 0 #0a0c26;
+}
+.star-hang {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 44px;
+  /* Only the star itself is tappable; the string must not block the stars above it */
+  pointer-events: none;
+}
+.star-hang:disabled .star-body { cursor: default; }
+.star-string {
+  flex: 1;
+  width: 2px;
+  background: rgb(255 246 220 / 0.35);
+}
+.star-body {
+  margin-top: -6px;
+  padding: 4px;
+  pointer-events: auto;
+  cursor: pointer;
+  transform-origin: 50% 0;
+  animation: star-sway 1.6s steps(2) infinite;
+  filter: drop-shadow(0 0 4px rgb(255 209 102 / 0.5));
+}
+.star-hang:hover .star-body,
+.star-hang:focus-visible .star-body { filter: drop-shadow(0 0 8px #ffd166); }
+@keyframes star-sway {
+  50% { rotate: 8deg; }
+}
+.star-fall .star-string { visibility: hidden; }
+.star-fall .star-body { animation: star-drop 500ms steps(6) forwards; }
+@keyframes star-drop {
+  to { transform: translateY(260px) rotate(120deg); opacity: 0; }
+}
+/* Prize ticket */
+.star-ticket {
+  background: #fff6dc;
+  outline: 2px dashed #c9a24a;
+  outline-offset: -8px;
+  box-shadow: -4px 0 0 0 #ffd166, 4px 0 0 0 #ffd166, 0 -4px 0 0 #ffd166, 0 4px 0 0 #ffd166, 8px 8px 0 0 rgb(0 0 0 / 0.35);
+  animation: ticket-in 300ms steps(4) both;
+}
+@keyframes ticket-in {
+  from { transform: scale(0.3) rotate(-8deg); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .star-body, .star-ticket { animation: none; }
+  .star-fall .star-body { animation: none; opacity: 0; }
+}
