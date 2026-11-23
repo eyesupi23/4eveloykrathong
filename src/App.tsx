@@ -210,14 +210,30 @@ export default function App() {
     return () => clearInterval(id);
   }, []);
 
+  // The one wish bubble tapped open. It stays open (also in photo mode) until another krathong
+  // is tapped, the same one is tapped again, or someone taps empty space.
+  const [wishId, setWishId] = useState<string | null>(null);
+  const pinWish = useCallback((id: string) => setWishId((w) => (w === id ? null : id)), []);
+  useEffect(() => {
+    const onDown = (e: PointerEvent) => {
+      const el = e.target as Element | null;
+      if (!el?.closest(".krathong-btn, [data-keep-wish]")) setWishId(null);
+    };
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, []);
+
   const handleDone = useCallback((id: string) => {
+    const nextId = uid();
+    // Your own krathong keeps its open wish when it comes around again.
+    setWishId((w) => (w === id ? nextId : w));
     setRiver((r) => {
       const done = r.find((k) => k.id === id);
       const rest = r.filter((k) => k.id !== id);
       // Your own krathongs come around again; visitors drift away.
       // Restart from the left on the same path and speed, so spacing between them is kept.
       return done?.mine
-        ? [...rest, { ...done, id: uid(), delay: 0, fresh: false }]
+        ? [...rest, { ...done, id: nextId, delay: 0, fresh: false }]
         : rest;
     });
   }, []);
@@ -307,7 +323,7 @@ export default function App() {
         className={`pointer-events-none absolute inset-0 z-20 ${game ? "anim-paused" : ""}`}
       >
         {river.map((k) => (
-          <FloatingKrathong key={k.id} item={k} onDone={handleDone} />
+          <FloatingKrathong key={k.id} item={k} onDone={handleDone} pinned={k.id === wishId} onPin={pinWish} />
         ))}
       </div>
 
@@ -352,6 +368,7 @@ export default function App() {
       <button
         type="button"
         onClick={() => setPhoto(true)}
+        data-keep-wish
         aria-label="โหมดถ่ายภาพ (ซ่อนปุ่มเพื่อแคปหน้าจอ)"
         className={`px-chip absolute right-4 top-[calc(max(1rem,env(safe-area-inset-top))+3.5rem)] z-40 grid h-11 w-11 place-items-center sm:right-8 sm:top-[5.5rem] ${photo ? "hidden" : ""}`}
       >
@@ -363,6 +380,7 @@ export default function App() {
         <button
           type="button"
           onClick={() => setPhoto(false)}
+          data-keep-wish
           aria-label="ออกจากโหมดถ่ายภาพ"
           className="absolute inset-0 z-60 cursor-pointer"
         >
