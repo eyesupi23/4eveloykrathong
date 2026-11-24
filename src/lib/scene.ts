@@ -1,4 +1,11 @@
 
+import { loadShape, type ShapePoint } from './shapeBurst';
+
+/** Picture fireworks: every so often a rocket bursts into this picture (transparent background works best). */
+const SHAPE_SRC = `${import.meta.env.BASE_URL}images/4EVE.png`;
+/** A picture firework replaces one in every 3 to 5 automatic rockets. */
+const SHAPE_EVERY: [number, number] = [3, 5];
+
 /** Fraction of the screen height where the sky meets the river. */
 export const HORIZON = 0.62;
 
@@ -15,7 +22,9 @@ const FIREWORKS = [
 
 interface Star { x: number; y: number; phase: number; big: boolean }
 interface Lantern { x: number; y: number; speed: number; phase: number }
-interface Rocket { x: number; y: number; vy: number; targetY: number; palette: string[] }
+interface Rocket { x: number; y: number; vy: number; targetY: number; palette: string[]; shape?: boolean }
+/** A spark of a picture firework: flies out to its spot, holds the picture, then drops and fades. */
+interface ShapeSpark { ox: number; oy: number; dx: number; dy: number; color: string; age: number; fall: number; jitter: number }
 interface Spark { x: number; y: number; vx: number; vy: number; life: number; max: number; palette: string[] }
 
 /** Where the artist sign sits, as % of the scene, so the logo can be overlaid in sharper detail. */
@@ -55,6 +64,9 @@ export class NightScene {
   private lanterns: Lantern[] = [];
   private rockets: Rocket[] = [];
   private sparks: Spark[] = [];
+  private shapeSparks: ShapeSpark[] = [];
+  private shape: ShapePoint[] = [];
+  private untilShape = 2; // automatic rockets left before the next picture firework
   private skyline: number[] = [];
   private timers: number[] = [];
   private wheelX = 0;
@@ -74,6 +86,11 @@ export class NightScene {
   }
 
   start() {
+    loadShape(SHAPE_SRC)
+      .then((pts) => (this.shape = pts))
+      .catch(() => {
+        // Picture missing: only normal fireworks.
+      });
     this.resize();
     this.ro.observe(this.canvas);
     this.raf = requestAnimationFrame(this.loop);
@@ -96,8 +113,14 @@ export class NightScene {
 
   /** A volley of fireworks, e.g. when someone floats a krathong. */
   celebrate(count = 6) {
+    const mid = Math.floor(count / 2); // one picture firework in the middle of the volley
     for (let i = 0; i < count; i++) {
-      this.timers.push(window.setTimeout(() => this.launch(rand(this.w * 0.15, this.w * 0.85)), i * 220));
+      this.timers.push(
+        window.setTimeout(
+          () => (i === mid ? this.launchShape() : this.launch(rand(this.w * 0.15, this.w * 0.85))),
+          i * 220,
+        ),
+      );
     }
   }
 
@@ -227,7 +250,44 @@ export class NightScene {
     });
   }
 
+  /** Pixel size of one picture spark: bigger on wide screens so the picture stays readable. */
+  private get shapeScale() {
+    return this.w < 220 ? 1 : 2;
+  }
+
+  private launchShape() {
+    if (!this.shape.length) return this.launch(rand(this.w * 0.15, this.w * 0.85));
+    const s = this.shapeScale;
+    const half = (Math.max(...this.shape.map((p) => Math.abs(p.dx))) + 2) * s;
+    const lo = Math.min(this.w / 2, half + 2);
+    this.rockets.push({
+      x: rand(lo, this.w - lo),
+      y: this.horizonY - 2,
+      vy: -rand(0.1, 0.12),
+      targetY: rand(this.h * 0.14, this.h * 0.28),
+      palette: FIREWORKS[1],
+      shape: true,
+    });
+  }
+
+  private explodeShape(r: Rocket) {
+    const s = this.shapeScale;
+    for (const p of this.shape) {
+      this.shapeSparks.push({
+        ox: r.x, oy: r.y, dx: p.dx * s, dy: p.dy * s, color: p.color,
+        age: 0, fall: 0, jitter: rand(0, 250),
+      });
+    }
+    // a small ring of ordinary sparks for the bang
+    for (let i = 0; i < 14; i++) {
+      const a = (i / 14) * Math.PI * 2;
+      const max = rand(500, 800);
+      this.sparks.push({ x: r.x, y: r.y, vx: Math.cos(a) * 0.05, vy: Math.sin(a) * 0.05, life: max, max, palette: FIREWORKS[0] });
+    }
+  }
+
   private explode(r: Rocket) {
+    if (r.shape) return this.explodeShape(r);
     const n = Math.floor(rand(40, 64));
     const power = rand(0.04, 0.07);
     for (let i = 0; i < n; i++) {
@@ -248,7 +308,14 @@ export class NightScene {
 
   private update(dt: number, t: number) {
     if (!this.reduced && t > this.nextAuto) {
-      if (this.nextAuto) this.launch(rand(this.w * 0.08, this.w * 0.92));
+      if (this.nextAuto) {
+        if (--this.untilShape <= 0 && this.shape.length) {
+          this.launchShape();
+          this.untilShape = Math.round(rand(...SHAPE_EVERY));
+        } else {
+          this.launch(rand(this.w * 0.08, this.w * 0.92));
+        }
+      }
       this.nextAuto = t + rand(1600, 4000);
     }
     const hy = this.horizonY;
@@ -270,6 +337,13 @@ export class NightScene {
       s.vx *= 0.996;
       s.life -= dt;
       return s.life > 0 && s.y < hy;
+    });
+
+    // Picture sparks: fly out (0–450 ms), hold the picture (to ~1.5 s), then drop and fade.
+    this.shapeSparks = this.shapeSparks.filter((p) => {
+      p.age += dt;
+      if (p.age > 1500 + p.jitter) p.fall += 0.00003 * dt * (p.age - 1500 - p.jitter);
+      return p.age < 2600 + p.jitter;
     });
 
     for (const l of this.lanterns) {
@@ -360,6 +434,17 @@ export class NightScene {
         rect(s.x - s.vx * 22, s.y - s.vy * 22, 1, 1, s.palette[2]);
       }
       rect(s.x, s.y, 1, 1, c);
+    }
+
+    for (const p of this.shapeSparks) {
+      const out = Math.min(1, p.age / 450);
+      const e = 1 - (1 - out) * (1 - out) * (1 - out); // ease-out: fast burst, gentle stop
+      const fading = p.age > 2000 + p.jitter;
+      if (fading && Math.floor(t / 70 + p.dx) % 2) continue; // 8-bit flicker out
+      const sz = this.shapeScale;
+      const twinkle = p.age > 450 && p.age < 1500 && Math.floor(t / 110 + p.dx * 3 + p.dy) % 9 === 0;
+      const c = p.age < 180 || twinkle ? '#ffffff' : p.color;
+      rect(p.ox + p.dx * e, p.oy + p.dy * e + p.fall, sz, sz, c);
     }
 
     this.drawBeams(t);
