@@ -8,7 +8,7 @@ export interface SkyHandle {
 const LOGO_SRC = `${import.meta.env.BASE_URL}images/logo.jpg`;
 
 /** Video shown on the outdoor cinema screen. Muted autoplay; sound turns on at the first tap. */
-const YT_ID = 'mMpqChNcOhw';
+const YT_ID = 'LpmqPafnZP8';
 const YT_SRC =
   `https://www.youtube.com/embed/${YT_ID}?autoplay=1&mute=1&loop=1&playlist=${YT_ID}` +
   '&controls=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1' +
