@@ -76,6 +76,7 @@ export const SkyScene = forwardRef<SkyHandle, Props>(function SkyScene(
   ref,
 ) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const hiRef = useRef<HTMLCanvasElement>(null); // full-resolution layer for picture fireworks
   const sceneRef = useRef<NightScene | null>(null);
   const [layout, setLayout] = useState<StageLayout | null>(null);
   const [logo, setLogo] = useState<string | null>(null);
@@ -106,7 +107,7 @@ export const SkyScene = forwardRef<SkyHandle, Props>(function SkyScene(
   useImperativeHandle(ref, () => ({ celebrate: (n) => sceneRef.current?.celebrate(n) }), []);
 
   useEffect(() => {
-    const scene = new NightScene(canvasRef.current!, setLayout);
+    const scene = new NightScene(canvasRef.current!, setLayout, hiRef.current);
     sceneRef.current = scene;
     scene.start();
     return () => scene.stop();
@@ -131,6 +132,7 @@ export const SkyScene = forwardRef<SkyHandle, Props>(function SkyScene(
   return (
     <>
       <canvas ref={canvasRef} className="pixelated absolute inset-0 h-full w-full" aria-hidden />
+      <canvas ref={hiRef} className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden />
       {layout && fairContent && (
         <div className="absolute z-30" style={place(layout.fair)}>
           {fairContent}
