@@ -6,10 +6,19 @@ export interface ShapePoint {
 }
 
 /**
- * Turn a small picture with a transparent background (e.g. the 32×32 4EVE logo) into firework points:
+ * Turn a small picture with a transparent background (the 4EVE logo, or a round 32×32 face) into firework points:
  * every solid pixel becomes one spark, keeping the picture's own colour. Runs once; the result is reused.
  */
-export async function loadShape(src: string, maxSide = 40): Promise<ShapePoint[]> {
+export interface Shape {
+  points: ShapePoint[];
+  /** Longest side of the picture in sparks, used to draw every picture at the same size on screen. */
+  side: number;
+}
+
+export async function loadShape(
+  src: string,
+  { maxSide = 64, skipWhite = false, circle = false } = {},
+): Promise<Shape> {
   const img = new Image();
   img.src = src;
   await img.decode();
@@ -29,16 +38,20 @@ export async function loadShape(src: string, maxSide = 40): Promise<ShapePoint[]
     for (let x = 0; x < w; x++) {
       const i = (y * w + x) * 4;
       if (d[i + 3] < 128) continue; // transparent background
-      if (d[i] > 225 && d[i + 1] > 225 && d[i + 2] > 225) continue; // white background counts as empty too
+      // Optional round cut, so a square photo still bursts as a circle
+      if (circle && (x + 0.5 - w / 2) ** 2 + (y + 0.5 - h / 2) ** 2 > (Math.min(w, h) / 2) ** 2) continue;
+      // For logos on a white background, white counts as empty too (not for photos: faces have white bits)
+      if (skipWhite && d[i] > 225 && d[i + 1] > 225 && d[i + 2] > 225) continue;
       pts.push({ dx: x, dy: y, color: `rgb(${d[i]},${d[i + 1]},${d[i + 2]})` });
     }
   }
-  if (!pts.length) return pts;
+  const side = Math.max(w, h);
+  if (!pts.length) return { points: pts, side };
 
   // Centre on the solid part only, so empty margins in the file don't shift the burst.
   const xs = pts.map((p) => p.dx);
   const ys = pts.map((p) => p.dy);
   const cx = (Math.min(...xs) + Math.max(...xs)) / 2;
   const cy = (Math.min(...ys) + Math.max(...ys)) / 2;
-  return pts.map((p) => ({ ...p, dx: p.dx - cx, dy: p.dy - cy }));
+  return { points: pts.map((p) => ({ ...p, dx: p.dx - cx, dy: p.dy - cy })), side };
 }
