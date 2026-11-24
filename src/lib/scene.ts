@@ -81,7 +81,8 @@ export class NightScene {
   private hiCtx: CanvasRenderingContext2D | null;
   private hiDirty = false;
   private logoShape: Shape | null = null;
-  private faceShapes: Shape[] = [];
+  private faceShapes: (Shape | undefined)[] = []; // same order as FACE_SHAPES; empty until loaded
+  private nextFace = 0; // faces go in order: 11, 22, 33 … 77, then start again
   private lastShape: Shape | null = null;
   private untilShape = 2; // automatic rockets left before the next picture firework
   private skyline: number[] = [];
@@ -114,11 +115,14 @@ export class NightScene {
       .catch(() => {});
     this.timers.push(
       window.setTimeout(() => {
-        for (const f of FACE_SHAPES) {
+        FACE_SHAPES.forEach((f, i) => {
           loadShape(url(f.src), { skipWhite: f.skipWhite, circle: f.circle })
-            .then(({ points, side }) => points.length && this.faceShapes.push({ points, step: SHAPE_SIZE / side, logo: false }))
+            .then(({ points, side }) => {
+              // Keep each face in its own slot, so the order stays fixed whichever file loads first.
+              if (points.length) this.faceShapes[i] = { points, step: SHAPE_SIZE / side, logo: false };
+            })
             .catch(() => {});
-        }
+        });
       }, 3000),
     );
     this.resize();
@@ -290,11 +294,23 @@ export class NightScene {
     return this.w < 220 ? 1 : 2;
   }
 
-  /** Logo and faces take turns; never the same face twice in a row. */
+  /** The next face in order (skipping any that failed to load), or null if none are ready yet. */
+  private takeFace(): Shape | null {
+    const n = FACE_SHAPES.length;
+    for (let k = 0; k < n; k++) {
+      const face = this.faceShapes[(this.nextFace + k) % n];
+      if (face) {
+        this.nextFace = (this.nextFace + k + 1) % n;
+        return face;
+      }
+    }
+    return null;
+  }
+
+  /** Logo and faces take turns: 4EVE, face 11, 4EVE, face 22 … */
   private nextShape(): Shape | null {
-    const faces = this.faceShapes.filter((f) => f !== this.lastShape);
     const wantFace = this.lastShape?.logo || !this.logoShape;
-    const shape = wantFace && faces.length ? pick(faces) : (this.logoShape ?? (faces.length ? pick(faces) : null));
+    const shape = (wantFace && this.takeFace()) || this.logoShape || this.takeFace();
     if (shape) this.lastShape = shape;
     return shape;
   }
@@ -359,7 +375,7 @@ export class NightScene {
   private update(dt: number, t: number) {
     if (!this.reduced && t > this.nextAuto) {
       if (this.nextAuto) {
-        if (--this.untilShape <= 0 && (this.logoShape || this.faceShapes.length)) {
+        if (--this.untilShape <= 0 && (this.logoShape || this.faceShapes.some(Boolean))) {
           this.launchShape();
           this.untilShape = Math.round(rand(...SHAPE_EVERY));
         } else {
